@@ -1,0 +1,75 @@
+body, html { width: 100%; height: 100%; padding: 0; margin: 0; }
+
+#navbar-container {
+  width: calc(100% - 20px);
+  height: 40px;
+  background: #2C2F33;
+  display: flex;
+  flex-direction: row;
+  padding: 10px;
+  align-items: center;
+  color: white;
+  font-family: proxima-nova, sans-serif;
+  font-weight: 700;
+  font-style: normal;
+  font-size: 1.3em;
+}
+
+#navbar-header {
+  text-transform: none;
+  text-decoration: none;
+  color: white;
+}
+
+#navbar-icon {
+  font-size: 1.4em;
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+#navbar-links {
+  margin-left: auto;
+  margin-right: 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+#navbar-links a {
+  text-decoration: none;
+  color: white;
+  font-size: .8em;
+  font-family: proxima-nova, sans-serif;
+  font-style: normal;
+  font-weight: 100;
+  margin-left: 20px;
+  transition: all .2s ease-in;
+}
+
+#navbar-links a:hover {
+  color: rgba(255,255,255,0.8);
+}
+
+#navbar-button {
+  padding: 10px;
+  border-radius: 5px;
+  background-color: rgba(0, 0, 0, 0.5);
+  min-width: 80px;
+  text-align: center;
+}
+
+#navbar-button-primary {
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #7289DA;
+  min-width: 80px;
+  text-align: center;
+  margin-left: 10px !important;
+}
+
+.bg-wrapper {
+  background-image: url(/images/background.png);
+  background-repeat: repeat;
+  width: 100%;
+  min-height: 100vh;
+}
