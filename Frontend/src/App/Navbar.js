@@ -5,6 +5,7 @@ import { faBlog } from '@fortawesome/free-solid-svg-icons';
 
 class Navbar extends React.Component {
     state = {
+        user: {  },
         loggedIn: false
     }
 
@@ -25,11 +26,15 @@ class Navbar extends React.Component {
                 <div id="navbar-links">
                     <Link to="/posts">Posts</Link>
                     <Link to="/users">Users</Link>
-                    
                     {!loggedIn &&
                         <>
                             <Link id="navbar-button" to="/signup">Sign-up</Link>
                             <Link id="navbar-button-primary" to="/login">Login</Link>
+                        </>
+                    }
+                    {loggedIn &&
+                        <>
+                            <Link id="navbar-button-primary" to="/create_post">Create Post</Link>
                         </>
                     }
                 </div>

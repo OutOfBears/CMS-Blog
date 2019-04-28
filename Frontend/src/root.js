@@ -18,15 +18,17 @@ class App extends React.Component {
 
     render() {
         return (
-            <div class="bg-wrapper">
-                <Router history={browserHistory}>
-                    <Navbar />
-                    <Switch>
-                        <Route exact path="/" component={Portal} />
-                        {/* <Route exact path="/login" component={Login} /> */}
-                        {/* <Route exact path="/register" component={Register} /> */}
-                    </Switch>
-                </Router>
+            <div id="bg-wrapper">
+                    <Router history={browserHistory}>
+                        <Navbar />
+                        <div id="bg-inner-wrapper">
+                            <Switch>
+                                <Route exact path="/" component={Portal} />
+                                {/* <Route exact path="/login" component={Login} /> */}
+                                {/* <Route exact path="/register" component={Register} /> */}
+                            </Switch>
+                        </div>
+                    </Router>
             </div>
         );
     }
