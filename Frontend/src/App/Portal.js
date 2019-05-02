@@ -124,8 +124,10 @@ class Portal extends React.Component {
             );
 
         return (
-            <div id="posts-wrapper">
-                {posts.map((d, i) => this.renderPost(d, i))}
+            <div id="bg-inner-wrapper">
+                <div id="posts-wrapper">
+                    {posts.map((d, i) => this.renderPost(d, i))}
+                </div>
             </div>
         );
     }

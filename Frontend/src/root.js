@@ -1,14 +1,20 @@
 import React from 'react';
 import { Router, Route, Switch, Redirect } from 'react-router';
-import createBrowserHistory from "history/createBrowserHistory";
+import {createBrowserHistory} from "history";
 
 import './App/index.css';
 
-// our components
+// layout components
 import Navbar from './App/Navbar';
+
+// page components
 import Portal from './App/Portal';
+import Login from './App/Login';
+import Register from './App/Register';
 
 const browserHistory = createBrowserHistory();
+
+
 
 class App extends React.Component {
     componentWillMount() {
@@ -19,16 +25,14 @@ class App extends React.Component {
     render() {
         return (
             <div id="bg-wrapper">
-                    <Router history={browserHistory}>
-                        <Navbar />
-                        <div id="bg-inner-wrapper">
-                            <Switch>
-                                <Route exact path="/" component={Portal} />
-                                {/* <Route exact path="/login" component={Login} /> */}
-                                {/* <Route exact path="/register" component={Register} /> */}
-                            </Switch>
-                        </div>
-                    </Router>
+                <Router history={browserHistory}>
+                    <Navbar />
+                    <Switch>
+                        <Route exact path="/" component={Portal} />
+                        <Route exact path="/login" component={Login} />
+                        <Route exact path="/signup" component={Register} />
+                    </Switch>
+                </Router>
             </div>
         );
     }
