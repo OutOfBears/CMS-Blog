@@ -262,6 +262,8 @@ body, html { width: 100%; height: 100%; padding: 0; margin: 0; }
 }
 
 #auth label {
+  display: flex;
+  flex-direction: column;
   font-family: proxima-nova, sans-serif;
   font-style: normal;
   font-weight: 400;

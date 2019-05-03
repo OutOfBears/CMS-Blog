@@ -1,9 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { LoginAsync, GetCookie } from '../api';
+import Cookies from 'js-cookie';
 
 class Login extends React.Component {
     state = {
-        email: '',
+        user: '',
         password: '',
         error: ''
     }
@@ -13,19 +15,33 @@ class Login extends React.Component {
     }
 
     onSubmit = (e) => {
+        const { user, password } = this.state;
+
         e.preventDefault();
 
-        const { email, password } = this.state;
-    
-        this.setState({ error: 'not implemented' })
+        LoginAsync(user, password, (good, data) => {
+            if(!good) {
+                this.setState({ error: data });
+                return;
+            }
+            else {
+                console.log(Cookies.get("BLOG-AUTH"));
+                if(Cookies.get("BLOG-AUTH") !== "") {
+                    window.localStorage.setItem("user", 
+                        user);
 
-        // fetch('/api/auth/login')
-            
-        console.log("SUBMIT", email, password);
+                    // this.props.history.push("/");
+                } else {
+                    console.log("no cookie :L",GetCookie("BLOG-AUTH"));
+                    this.setState({ error: "invalid auth response" });
+                }
+            }
+        });
     }
 
+
     render() {
-        const { email, password, error } = this.state;
+        const { user, password, error } = this.state;
 
         return (
             <div id="auth-container">
@@ -39,8 +55,8 @@ class Login extends React.Component {
                     <form onSubmit={this.onSubmit}>
                         <label>
                             Username / Email
-                            <input type="text" name="email" autoFocus required
-                                value={email} onChange={this.handleChange("email")} />
+                            <input type="text" name="user" autoFocus required
+                                value={user} onChange={this.handleChange("user")} />
                         </label>
                         <label>
                             Password

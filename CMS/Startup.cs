@@ -7,21 +7,70 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
 using System.Threading.Tasks;
+using CMS.Services;
+using System;
 
 namespace CMS
 {
     public class Startup
     {
         public IConfiguration Configuration { get; }
-        public Startup(IConfiguration configuration)
+
+        public Startup(IHostingEnvironment env)
         {
-            Configuration = configuration;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json",
+                    optional: false,
+                    reloadOnChange: true)
+                .AddEnvironmentVariables();
+
+            if (env.IsDevelopment())
+            {
+                builder.AddUserSecrets<Startup>();
+            }
+
+            Configuration = builder.Build();
         }
 
+        private void InitializeDatabase(MongoClient client)
+        {
+            var Database = client.GetDatabase(Configuration["MONGO_DATABASE"]);
+            if (Database == null)
+                throw new Exception("Couldn't find database");
+
+            // Initialize required collections
+            var collections = Database.ListCollectionNames()
+                .ToList();
+            var requiredCollections = new string[]{ "users" };
+
+            foreach (var collection in requiredCollections)
+                if(!collections.Contains(collection))
+                    Database.CreateCollection(collection);
+        }
+
+        private void EnsureConfigVar(string name)
+        {
+            if (Configuration[name] == null)
+                throw new Exception($"Please specify {name} in settings");
+        }
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options =>
+            {
+                options.AddPolicy("default",
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin()
+                            .AllowAnyHeader()
+                            .AllowCredentials()
+                            .AllowAnyMethod();
+                    });
+            });
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             services.AddSpaStaticFiles(configuration =>
@@ -34,10 +83,21 @@ namespace CMS
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(o =>
                 {
+                    o.Cookie.Name = "BLOG-AUTH";
                     o.Events.OnRedirectToLogin = UnauthorizedLogin;
                     o.Events.OnRedirectToAccessDenied = UnauthorizedLogin;
                 });
 
+
+            // Initialize the database and get the database
+            EnsureConfigVar("MONGO_URL");
+            EnsureConfigVar("MONGO_DATABASE");
+
+            var MongoDB = new MongoClient(Configuration["MONGO_URL"]);
+            InitializeDatabase(MongoDB);
+
+            services.AddSingleton(MongoDB.GetDatabase(Configuration["MONGO_DATABASE"]));
+            services.AddSingleton<UserService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -57,12 +117,15 @@ namespace CMS
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
+            
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "default",
                     template: "api/{controller}/{action=Index}/{id?}");
             });
+            
+            //app.UseMvcWithDefaultRoute();
 
 
             if (!env.IsDevelopment())
@@ -73,6 +136,8 @@ namespace CMS
                     //spa.UseReactDevelopmentServer(npmScript: "start");
                 });
             }
+
+            
         }
 
         private Task UnauthorizedLogin(RedirectContext<CookieAuthenticationOptions> context)

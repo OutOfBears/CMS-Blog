@@ -1,10 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { RegisterAsync } from '../api';
 
 class Register extends React.Component {
     state = {
-        user: '',
         email: '',
+        username: '',
         password: '',
         error: ''
     }
@@ -14,17 +15,22 @@ class Register extends React.Component {
     }
 
     onSubmit = (e) => {
-        e.preventDefault();
+        const { email, username, password } = this.state;
 
-        const { email, password } = this.state;
+        e.preventDefault();
     
-        // fetch('/api/auth/login')
-            
-        console.log("SUBMIT", email, password);
+        RegisterAsync(username, email, password, (good, data) => {
+            if(!good) {
+                this.setState({ error: data });
+                return;
+            } else {
+                console.log(good, data);
+            }
+        });
     }
 
     render() {
-        const { user, email, password, error } = this.state;
+        const { username, email, password, error } = this.state;
 
         return (
             <div id="auth-container">
@@ -38,12 +44,12 @@ class Register extends React.Component {
                     <form onSubmit={this.onSubmit}>
                         <label>
                             Username
-                            <input type="text" name="username" required
-                                value={user} onChange={this.handleChange("user")} />
+                            <input type="text" name="username" autoFocus required
+                                value={username} onChange={this.handleChange("username")} />
                         </label>
                         <label>
                             Email
-                            <input type="email" name="email" autoFocus required
+                            <input type="email" name="email" required
                                 value={email} onChange={this.handleChange("email")} />
                         </label>
                         <label>
