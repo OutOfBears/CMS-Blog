@@ -11,6 +11,8 @@ using MongoDB.Driver;
 using System.Threading.Tasks;
 using CMS.Services;
 using System;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
 
 namespace CMS
 {
@@ -26,6 +28,9 @@ namespace CMS
                     optional: false,
                     reloadOnChange: true)
                 .AddEnvironmentVariables();
+
+            if (!Directory.Exists("Thumbnails"))
+                Directory.CreateDirectory("Thumbnails");
 
             if (env.IsDevelopment())
             {
@@ -44,7 +49,7 @@ namespace CMS
             // Initialize required collections
             var collections = Database.ListCollectionNames()
                 .ToList();
-            var requiredCollections = new string[]{ "users" };
+            var requiredCollections = new string[]{ "users", "posts" };
 
             foreach (var collection in requiredCollections)
                 if(!collections.Contains(collection))
@@ -98,6 +103,7 @@ namespace CMS
 
             services.AddSingleton(MongoDB.GetDatabase(Configuration["MONGO_DATABASE"]));
             services.AddSingleton<UserService>();
+            services.AddSingleton<PostsService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -116,8 +122,14 @@ namespace CMS
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(Directory.GetCurrentDirectory(), "Thumbnails")),
+                RequestPath = "/thumbnails"
+            });
 
-            
+            app.UseAuthentication();
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

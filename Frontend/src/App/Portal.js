@@ -1,106 +1,74 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFolderOpen } from '@fortawesome/free-solid-svg-icons';
+import { Config, GetPopularPosts } from '../api';
+
+import Identicon from 'react-identicons';
 
 class Portal extends React.Component {
     state = {
-        posts: [
-            {
-                user: {name: "Jack Fox", pic: "https://t2.ea.ltmcdn.com/en/images/7/8/1/what_colors_are_shiba_inu_dogs_187_600.jpg"}, 
-                title: "Revisiting the Reality TV Shows of My Youth",
-                post: "‘Queer Eye’ and ‘American Idol’ have evolved alongside American culture — and maybe I have, too",
-                thumb: "https://www.nbcsports.com/sites/nbcsports.com/files/2018/11/21/nbc_dog_nonsporting_shibainu_181119.jpg",
-                date: new Date()
-            },
-            {
-                user: {name: "Jack Fox", pic: "https://t2.ea.ltmcdn.com/en/images/7/8/1/what_colors_are_shiba_inu_dogs_187_600.jpg"}, 
-                title: "Revisiting the Reality TV Shows of My Youth",
-                post: "‘Queer Eye’ and ‘American Idol’ have evolved alongside American culture — and maybe I have, too",
-                thumb: "https://www.nbcsports.com/sites/nbcsports.com/files/2018/11/21/nbc_dog_nonsporting_shibainu_181119.jpg",
-                date: new Date()
-            },
-            {
-                user: {name: "Jack Fox", pic: "https://t2.ea.ltmcdn.com/en/images/7/8/1/what_colors_are_shiba_inu_dogs_187_600.jpg"}, 
-                title: "Revisiting the Reality TV Shows of My Youth",
-                post: "‘Queer Eye’ and ‘American Idol’ have evolved alongside American culture — and maybe I have, too",
-                thumb: "https://www.nbcsports.com/sites/nbcsports.com/files/2018/11/21/nbc_dog_nonsporting_shibainu_181119.jpg",
-                date: new Date()
-            },
-            {
-                user: {name: "Jack Fox", pic: "https://t2.ea.ltmcdn.com/en/images/7/8/1/what_colors_are_shiba_inu_dogs_187_600.jpg"}, 
-                title: "Revisiting the Reality TV Shows of My Youth",
-                post: "‘Queer Eye’ and ‘American Idol’ have evolved alongside American culture — and maybe I have, too",
-                thumb: "https://www.nbcsports.com/sites/nbcsports.com/files/2018/11/21/nbc_dog_nonsporting_shibainu_181119.jpg",
-                date: new Date()
-            },
-            {
-                user: {name: "Jack Fox", pic: "https://t2.ea.ltmcdn.com/en/images/7/8/1/what_colors_are_shiba_inu_dogs_187_600.jpg"}, 
-                title: "Revisiting the Reality TV Shows of My Youth",
-                post: "‘Queer Eye’ and ‘American Idol’ have evolved alongside American culture — and maybe I have, too",
-                thumb: "https://www.nbcsports.com/sites/nbcsports.com/files/2018/11/21/nbc_dog_nonsporting_shibainu_181119.jpg",
-                date: new Date()
-            },
-            {
-                user: {name: "Jack Fox", pic: "https://t2.ea.ltmcdn.com/en/images/7/8/1/what_colors_are_shiba_inu_dogs_187_600.jpg"}, 
-                title: "Revisiting the Reality TV Shows of My Youth",
-                post: "‘Queer Eye’ and ‘American Idol’ have evolved alongside American culture — and maybe I have, too",
-                thumb: "https://www.nbcsports.com/sites/nbcsports.com/files/2018/11/21/nbc_dog_nonsporting_shibainu_181119.jpg",
-                date: new Date()
-            },
-            {
-                user: {name: "Jack Fox", pic: "https://t2.ea.ltmcdn.com/en/images/7/8/1/what_colors_are_shiba_inu_dogs_187_600.jpg"}, 
-                title: "Revisiting the Reality TV Shows of My Youth",
-                post: "‘Queer Eye’ and ‘American Idol’ have evolved alongside American culture — and maybe I have, too",
-                thumb: "https://www.nbcsports.com/sites/nbcsports.com/files/2018/11/21/nbc_dog_nonsporting_shibainu_181119.jpg",
-                date: new Date()
-            },
-            {
-                user: {name: "Jack Fox", pic: "https://t2.ea.ltmcdn.com/en/images/7/8/1/what_colors_are_shiba_inu_dogs_187_600.jpg"}, 
-                title: "Revisiting the Reality TV Shows of My Youth",
-                post: "‘Queer Eye’ and ‘American Idol’ have evolved alongside American culture — and maybe I have, too",
-                thumb: "https://www.nbcsports.com/sites/nbcsports.com/files/2018/11/21/nbc_dog_nonsporting_shibainu_181119.jpg",
-                date: new Date()
-            },
-            {
-                user: {name: "Jack Fox", pic: "https://t2.ea.ltmcdn.com/en/images/7/8/1/what_colors_are_shiba_inu_dogs_187_600.jpg"}, 
-                title: "Revisiting the Reality TV Shows of My Youth",
-                post: "‘Queer Eye’ and ‘American Idol’ have evolved alongside American culture — and maybe I have, too",
-                thumb: "https://www.nbcsports.com/sites/nbcsports.com/files/2018/11/21/nbc_dog_nonsporting_shibainu_181119.jpg",
-                date: new Date()
-            },
-            {
-                user: {name: "Jack Fox", pic: "https://t2.ea.ltmcdn.com/en/images/7/8/1/what_colors_are_shiba_inu_dogs_187_600.jpg"}, 
-                title: "Revisiting the Reality TV Shows of My Youth",
-                post: "‘Queer Eye’ and ‘American Idol’ have evolved alongside American culture — and maybe I have, too",
-                thumb: "https://www.nbcsports.com/sites/nbcsports.com/files/2018/11/21/nbc_dog_nonsporting_shibainu_181119.jpg",
-                date: new Date()
-            },
-        ]
+        isLoading: false,
+        posts: []
+    }
+
+    componentWillMount() {
+        this.updatePosts();
     }
     
+    updatePosts = () => {
+        this.setState({ isLoading: true });
+        GetPopularPosts(8, (success, data) => {
+            if(success) {
+                this.setState({ posts: data });
+            } else {
+                console.error(success, data);
+            }
+
+            this.setState({ isLoading: false });
+        })
+    }
+
     formatDate = (date) => {
-        return date.toDateString();
+        return new Date(date).toDateString();
+    }
+
+    redirectToPost = (post, isUser) => (e) => {
+        var node = e.target;
+        var creator = ReactDOM.findDOMNode(this.creator);
+        console.log(!node.contains(e.target), node !== creator, e.target, creator);
+
+        if(isUser)
+            this.props.history.push(`/users/${post.author.id}`);
+        else
+            this.props.history.push(`/posts/${post._id}`);
     }
 
     renderPost = (post, idx) => {
         return (
-            <div id="post-thumb" key={idx}>
-                <div id="post-thumbnail">
-                    <img src={post.thumb} alt="Post Thumbnail" />
+            <div id="post-thumb" key={idx} >
+                <div id="post-thumb-info" onClick={this.redirectToPost(post, false)}>
+                    <div id="post-thumbnail">
+                        <img src={`${Config.baseUrl}${post.thumbnail}`} alt="Post Thumbnail" />
+                    </div>
+                    <div id="post-thumb-title">{post.title}</div>
+                    <div id="post-thumb-desc">{post.content.substring(0, 100)}</div>
                 </div>
-                <div id="post-thumb-title">{post.title}</div>
-                <div id="post-thumb-desc">{post.post}</div>
-                <div id="post-thumb-creator">
+                <div id="post-thumb-creator" onClick={this.redirectToPost(post, true)}>
                     <div id="post-thumb-creator-img">
-                        <img src={post.user.pic} alt="User profile" />
+                        <Identicon 
+                            size="30"
+                            string={post.author.username}
+                        />
+                        {/* <img src="https://www.nbcsports.com/sites/nbcsports.com/files/2018/11/21/nbc_dog_nonsporting_shibainu_181119.jpg" alt="User profile" /> */}
                     </div>
                     <div id="post-thumb-creator-info">
-                        <Link to={`/users/${post.user.name}`}>
-                            {post.user.name}
-                        </Link>
+                        <span>
+                            {post.author.username}
+                        </span>
                         <span id="post-thumb-create-date">
-                            {this.formatDate(post.date)}
+                            {this.formatDate(post.created_at)}
                         </span>
                     </div>
                 </div> 

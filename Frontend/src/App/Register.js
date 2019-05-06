@@ -1,6 +1,7 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { RegisterAsync } from '../api';
+import { UserContext } from './Context/UserContext';
 
 class Register extends React.Component {
     state = {
@@ -14,7 +15,7 @@ class Register extends React.Component {
         this.setState({ [name]: e.target.value });
     }
 
-    onSubmit = (e) => {
+    onSubmit = (context) => (e) => {
         const { email, username, password } = this.state;
 
         e.preventDefault();
@@ -25,6 +26,9 @@ class Register extends React.Component {
                 return;
             } else {
                 console.log(good, data);
+
+                context.loadUser(data.user);
+                this.props.history.push("/");
             }
         });
     }
@@ -41,26 +45,30 @@ class Register extends React.Component {
                             Error: {error}
                         </div>
                     }
-                    <form onSubmit={this.onSubmit}>
-                        <label>
-                            Username
-                            <input type="text" name="username" autoFocus required
-                                value={username} onChange={this.handleChange("username")} />
-                        </label>
-                        <label>
-                            Email
-                            <input type="email" name="email" required
-                                value={email} onChange={this.handleChange("email")} />
-                        </label>
-                        <label>
-                            Password
-                            <input type="password" name="password" required
-                                value={password} onChange={this.handleChange("password")} />
-                        </label>
-                        <div id="register-caption">By registering you are agreeing to the Terms of Service.</div>
-                        <input type="submit" id="auth-submit-button" value="Continue" />
-                        
-                    </form>
+                    <UserContext.Consumer>
+                        {(context) => (
+                            <form onSubmit={this.onSubmit(context)}>
+                                <label>
+                                    Username
+                                    <input type="text" name="username" autoFocus required
+                                        value={username} onChange={this.handleChange("username")} />
+                                </label>
+                                <label>
+                                    Email
+                                    <input type="email" name="email" required
+                                        value={email} onChange={this.handleChange("email")} />
+                                </label>
+                                <label>
+                                    Password
+                                    <input type="password" name="password" required
+                                        value={password} onChange={this.handleChange("password")} />
+                                </label>
+                                <div id="register-caption">By registering you are agreeing to the Terms of Service.</div>
+                                <input type="submit" id="auth-submit-button" value="Continue" />
+                                {context.isLoggedIn() && <Redirect to="/" />}
+                            </form>
+                        )}
+                    </UserContext.Consumer>
                 </div>
             </div>
         );

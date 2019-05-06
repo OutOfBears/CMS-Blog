@@ -1,26 +1,83 @@
 // https://localhost:44356/
 
-const Config = {
+export const Config = {
     baseUrl: 'https://localhost:44356'
 }
 
 const NullFunction = () => { }
 
-export function GetCookie(cookieName)
+export async function GetPost(id, callback = NullFunction)
 {
-    var name = `${cookieName}=`;
-    var cookies = document.cookie.split(';');
-    for(var i = 0; i < cookies.length; i++) {
-        var cookie = cookies[i];
-        while(cookie.charAt(0) === ' ') 
-            cookie = cookie.substring(1);
-        
-        if(cookie.indexOf(name) === 0)
-            return cookie.substring(name.length, 
-                cookie.length);
-    }
+    fetch(`${Config.baseUrl}/api/posts/${id}`)
+        .then(res => res.json())
+        .then(res => callback(true, res))
+        .catch(ex => callback(false, ex))
+}
 
-    return "";
+export async function GetPopularPosts(limit = 10, callback = NullFunction)
+{
+    fetch(`${Config.baseUrl}/api/posts/popular`)
+        .then(res => res.json())
+        .then(res => callback(true, res))
+        .catch(ex => callback(false, ex))
+}
+
+export async function DeletePost(id, callback = NullFunction) {
+    fetch(`${Config.baseUrl}/api/posts/${id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+    })
+        .then(res => {
+            if(res.ok)
+                return callback(true);
+            return callback(false, "failed");
+        })
+        .catch(ex => callback(false, ex));
+}
+
+// THUMBNAIL HAS TO EQUAL A FILE!
+export async function SubmitPost(title, content, thumbnail, callback = NullFunction)
+{
+    var formData = new FormData();
+    formData.append('title', title);
+    formData.append('content', content);
+    formData.append('thumbnail', thumbnail);
+
+    fetch(`${Config.baseUrl}/api/posts`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData
+    })
+        .then(res => res.json())
+        .then(data => callback(true, data))
+        .catch(ex => callback(false, ex));
+}
+
+export async function DownloadUser(callback = NullFunction)
+{
+    fetch(`${Config.baseUrl}/api/auth/me`, {
+        method: 'GET',
+        credentials: 'include'
+    })
+        .then(res => res.json())
+        .then(res => callback(true, res))
+        .catch(ex => callback(false, ex));
+}
+
+export async function LogoutAsync(callback = NullFunction) {
+    fetch(`${Config.baseUrl}/api/auth/Logout`, {
+        method: 'GET',
+        credentials: 'include'
+    })
+        .then(res => {
+            if(res.ok)
+                return callback(true);
+
+            return callback(false, "Unauthorized");
+        })
+        .catch(err => {
+            callback(false, err);
+        })
 }
 
 export async function LoginAsync(user, password, callback = NullFunction)

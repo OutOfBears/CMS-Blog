@@ -9,6 +9,7 @@ using CMS.Services;
 using BCrypt.Net;
 using Microsoft.AspNetCore.Cors;
 using System.Security.Claims;
+using CMS.Misc;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
@@ -53,7 +54,7 @@ namespace CMS.Controllers
             }
         }
 
-        private async Task CreateLoginSession(User user)
+        private async Task<AuthenticationProperties> CreateLoginSession(User user)
         {
             // We only want to store the Id, since we generated the cookie,
             // it'll always be right
@@ -73,6 +74,8 @@ namespace CMS.Controllers
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(claimsIdentity), authProps);
+
+            return authProps;
         }
 
         private async Task<Tuple<bool, User>> AuthUser(string userInfo, string password)
@@ -85,7 +88,7 @@ namespace CMS.Controllers
             return new Tuple<bool, User>(false, null);
         }
 
-        private async Task CreateUser(string username, string email, string password)
+        private async Task<User> CreateUser(string username, string email, string password)
         {
             var userResult = await _userService.GetUserByUserOrEmail(username);
             if (userResult != null)
@@ -105,7 +108,8 @@ namespace CMS.Controllers
             };
 
             await _userService.CreateUser(user);
-            await CreateLoginSession(user);
+
+            return user;
         }
 
 
@@ -116,11 +120,47 @@ namespace CMS.Controllers
             return Ok(new { Timestamp = DateTime.UtcNow, Status = "OK" });
         }
 
+
+        [HttpGet]
+        public async Task<ActionResult> Me()
+        {
+            var userId = this.GetCurrentUserId();
+            if (userId == null) return Unauthorized();
+
+            var user = await _userService.GetUserById(userId);
+
+            return Json(new
+            {
+                user = new
+                {
+                    id = user._id,
+                    user.created_at,
+                    user.username
+                }
+            });
+
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> Logout()
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Unauthorized();
+
+            await HttpContext.SignOutAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme);
+
+            return Ok();
+        }
+
         [HttpPost]
         public async Task<ActionResult> Login (
             [FromBody] UserLoginInput userInput
         )
         {
+            if (User.Identity.IsAuthenticated)
+                return Unauthorized();
+
             if (string.IsNullOrWhiteSpace(userInput.user) || string.IsNullOrWhiteSpace(userInput.password))
                 return BadRequest("empty user or password");
 
@@ -128,8 +168,23 @@ namespace CMS.Controllers
 
             if (authResponse.Item1 && authResponse.Item2 != null)
             {
-                await CreateLoginSession(authResponse.Item2);
-                return Ok();
+                var user = authResponse.Item2;
+                var props = await CreateLoginSession(user);
+
+                return Json(new
+                {
+                    auth = new
+                    {
+                        issued = props.IssuedUtc,
+                        expires = props.ExpiresUtc
+                    },
+                    user = new
+                    {
+                        id = user._id,
+                        user.created_at,
+                        user.username
+                    }
+                });
             }
             
 
@@ -140,6 +195,9 @@ namespace CMS.Controllers
             [FromBody] UserRegisterInput userInput
         )
         {
+            if (User.Identity.IsAuthenticated)
+                return Unauthorized();
+
             if (string.IsNullOrWhiteSpace(userInput.email)
                 || string.IsNullOrWhiteSpace(userInput.username)
                 || string.IsNullOrWhiteSpace(userInput.password))
@@ -153,10 +211,25 @@ namespace CMS.Controllers
 
             try
             {
-                await CreateUser(userInput.username, userInput.email,
+                var user = await CreateUser(userInput.username, userInput.email,
                     userInput.password);
 
-                return Ok();
+                var props = await CreateLoginSession(user);
+
+                return Json(new
+                {
+                    auth = new
+                    {
+                        issued = props.IssuedUtc,
+                        expires = props.ExpiresUtc
+                    },
+                    user = new
+                    {
+                        id = user._id,
+                        user.created_at,
+                        user.username
+                    }
+                });
             }
             catch (Exception ex)
             {
