@@ -203,6 +203,12 @@ namespace CMS.Controllers
                 || string.IsNullOrWhiteSpace(userInput.password))
                 return StatusCode(400, "email/username/password are empty");
 
+            if (userInput.username.Length < 3 || userInput.username.Length > 32)
+                return StatusCode(400, "username has to be between 3 and 32 characters");
+
+            if (userInput.password.Length < 6 || userInput.password.Length > 128)
+                return StatusCode(400, "password has to be between 6 and 128 characters");
+
             if (!userInput.username.All(char.IsLetterOrDigit))
                 return StatusCode(400, "username has to be alphanumeric");
 

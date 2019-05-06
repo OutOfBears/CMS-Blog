@@ -1,7 +1,10 @@
+import { Exception } from "handlebars";
+
 // https://localhost:44356/
 
 export const Config = {
-    baseUrl: 'https://localhost:44356'
+    baseUrl: process.env.NODE_ENV === 'development' ?
+        'https://localhost:44356' : ''
 }
 
 const NullFunction = () => { }
@@ -16,7 +19,7 @@ export async function GetPost(id, callback = NullFunction)
 
 export async function GetPopularPosts(limit = 10, callback = NullFunction)
 {
-    fetch(`${Config.baseUrl}/api/posts/popular`)
+    fetch(`${Config.baseUrl}/api/posts/popular?limit=${limit}`)
         .then(res => res.json())
         .then(res => callback(true, res))
         .catch(ex => callback(false, ex))
@@ -93,9 +96,16 @@ export async function LoginAsync(user, password, callback = NullFunction)
         .then(res => {
             if(!res.ok)
                 return res.text();
-            callback(true, res);
+            return res.json();
         })
-        .then(res => { if(typeof res === 'string') throw res })
+        .then(res => { 
+            if(typeof res === 'object') 
+                return callback(true, res);
+            else if(typeof res === 'string')
+                throw new Exception(res);
+            else
+                throw new Exception("invalid server response")
+        })
         .catch(err => {
             let message = err;
             if(typeof err === 'object')
@@ -127,9 +137,16 @@ export async function RegisterAsync(username, email, password, callback = NullFu
         .then(res => {
             if(!res.ok)
                 return res.text();
-            callback(true, res);
+            return res.json();
         })
-        .then(res => { if(typeof res === 'string') throw res })
+        .then(res => { 
+            if(typeof res === 'object') 
+                return callback(true, res);
+            else if(typeof res === 'string')
+                throw new Exception(res);
+            else
+                throw new Exception("invalid server response")
+        })
         .catch(err => {
             let message = err;
             if(typeof err === 'object')

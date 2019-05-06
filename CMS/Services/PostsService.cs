@@ -28,21 +28,43 @@ namespace CMS.Services
         public DateTime created_at;
     }
 
+    [BsonIgnoreExtraElements]
+    public class PostLimited
+    {
+        public class Author
+        {
+            public string id;
+            public string username;
+        }
+
+        [BsonId(IdGenerator = typeof(StringObjectIdGenerator))]
+        public string _id { get; set; }
+        public string title;
+        public string thumbnail;
+        public int views;
+        public Author author;
+        public DateTime created_at;
+    }
+
     public class PostsService
     {
         private IMongoCollection<Post> Posts;
+        private IMongoCollection<PostLimited> LimitedPosts;
 
         public PostsService(IMongoDatabase MongoDB)
         {
             Posts = MongoDB.GetCollection<Post>("posts");
+            LimitedPosts = MongoDB.GetCollection<PostLimited>("posts");
         }
 
         public async Task<List<Post>> GetPopularPosts(int limit = 5)
         {
-            var sort = Builders<Post>.Sort.Descending("views");
+            var sort = Builders<Post>.Sort
+                .Descending("views");
 
-            return (await Posts.FindAsync(Builders<Post>.Filter.Empty,
-                new FindOptions<Post>() {Sort = sort})).ToList();
+            return await (await Posts.FindAsync(Builders<Post>.Filter.Empty,
+                    new FindOptions<Post>() {Sort = sort, Limit = limit}))
+                .ToListAsync();
         }
 
         public async Task<bool> IncrementView(string _id)
@@ -65,6 +87,17 @@ namespace CMS.Services
             if (post != null && !post.Equals(default(Post)))
                 return post;
             return null;
+        }
+
+        public async Task<List<PostLimited>> GetPosts(int start, int limit)
+        {
+            var sort = Builders<PostLimited>.Sort
+                .Descending("created_at");
+
+            var result = await LimitedPosts.FindAsync(Builders<PostLimited>.Filter.Empty,
+                new FindOptions<PostLimited>() {Sort = sort, Limit = limit, Skip = start });
+
+            return await result.ToListAsync();
         }
 
         public async Task<bool> DeletePost(string _id, string authorId)

@@ -21,6 +21,7 @@ class Register extends React.Component {
         e.preventDefault();
     
         RegisterAsync(username, email, password, (good, data) => {
+            console.log(good, data);
             if(!good) {
                 this.setState({ error: data });
                 return;

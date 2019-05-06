@@ -7,9 +7,8 @@ import { Config, GetPopularPosts } from '../api';
 
 import Identicon from 'react-identicons';
 
-const CONTENT_LIMIT = 100;
 
-class Portal extends React.Component {
+class Posts extends React.Component {
     state = {
         isLoading: false,
         posts: []
@@ -36,14 +35,6 @@ class Portal extends React.Component {
         return new Date(date).toDateString();
     }
     
-    formatContent = (content) => {
-        if(content.length > CONTENT_LIMIT) {
-            content = content.substring(0, CONTENT_LIMIT - 3);
-            content = content + "...";
-        }
-
-        return content;
-    }
 
     redirectToPost = (post, isUser) => (e) => {
         var node = e.target;
@@ -90,7 +81,6 @@ class Portal extends React.Component {
     render() {
         const { posts } = this.state;
 
-
         if(posts.length < 1)
             return (
                 <>
@@ -103,16 +93,13 @@ class Portal extends React.Component {
             );
 
         return (
-            <>
-                <h2 id="bg-title">Popular Posts</h2>
-                <div id="bg-inner-wrapper">
-                    <div id="posts-wrapper">
-                        {posts.map((d, i) => this.renderPost(d, i))}
-                    </div>
+            <div id="bg-inner-wrapper">
+                <div id="posts-wrapper">
+                    {posts.map((d, i) => this.renderPost(d, i))}
                 </div>
-            </>
+            </div>
         );
     }
 }
   
-export default Portal;
+export default Posts;

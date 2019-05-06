@@ -133,6 +133,17 @@ body, html { width: 100%; height: 100%; padding: 0; margin: 0; }
 
 /* Background Styles */
 
+#bg-title {
+  color: gray;
+  font-family: proxima-nova, sans-serif;
+  font-style: normal;
+  margin: auto;
+  margin-top: 10px;
+  margin-bottom: -10px;
+  max-width: 1600px;
+  width: calc(100% - 25px);
+}
+
 #bg-wrapper {
   background-image: url(/images/background.png);
   background-repeat: repeat;
@@ -719,7 +730,7 @@ body, html { width: 100%; height: 100%; padding: 0; margin: 0; }
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: end;
+  justify-content: flex-end;
 }
 
 #post-views svg {

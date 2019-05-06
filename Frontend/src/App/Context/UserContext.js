@@ -18,15 +18,15 @@ export class UserProvider extends Component {
         updateUser: this.updateUser.bind(this)
     }
 
-    logOut() {
+    logOut(callback) {
         LogoutAsync();
         
-        this.state({ 
+        this.setState({ 
             user: {
                 id: '',
                 username: ''
             }
-        });
+        }, callback);
     }
 
     isLoggedIn() {
@@ -35,14 +35,14 @@ export class UserProvider extends Component {
         return (
             user.id !== '' && 
             user.username !== '' &&
-            !isLoading
+            isLoading !== true
         );
     }
 
-    loadUser(newUserInfo) {
+    loadUser(newUserInfo, callback) {
         let user = this.state.user;
         Object.assign(user, newUserInfo);
-        this.setState({ user });
+        this.setState({ user }, callback);
     }
 
     updateUser(loading = true){
@@ -59,7 +59,8 @@ export class UserProvider extends Component {
     }
 
     componentWillMount() {
-        this.updateUser(true);
+        if(!this.isLoggedIn())
+            this.updateUser(true);
     }
 
     render() {

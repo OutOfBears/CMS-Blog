@@ -25,10 +25,7 @@ class Login extends React.Component {
                 return;
             }
             else {
-                console.log(good, data);
-
-                context.loadUser(data);
-                this.props.history.push("/");
+                context.loadUser(data.user);
             }
         });
     }

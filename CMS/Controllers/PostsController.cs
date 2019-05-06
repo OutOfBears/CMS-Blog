@@ -33,6 +33,26 @@ namespace CMS.Controllers
 
         // Methods
         [HttpGet]
+        public async Task<ActionResult> Index(
+            [FromQuery] int start = 0,
+            [FromQuery] int limit = 20
+        )
+        {
+            if (start < 0)
+                return BadRequest("start cannot be negative");
+            if (limit < 0)
+                return BadRequest("Limit cannot be negative");
+            if (limit > 100)
+                return BadRequest("Limit cannot be over 100");
+
+            return Json(
+                await _postsService.GetPosts(start, limit)
+            );
+
+        }
+
+
+        [HttpGet]
         [Route("popular")]
         public async Task<ActionResult> Popular([FromQuery] int limit = 5)
         {
