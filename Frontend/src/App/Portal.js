@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFolderOpen } from '@fortawesome/free-solid-svg-icons';
+import { faFolderOpen, faCircleNotch } from '@fortawesome/free-solid-svg-icons';
 import { Config, GetPopularPosts } from '../api';
 
 import Identicon from 'react-identicons';
@@ -88,10 +88,13 @@ class Portal extends React.Component {
     }
 
     render() {
-        const { posts } = this.state;
+        const { 
+            posts,
+            isLoading
+        } = this.state;
 
 
-        if(posts.length < 1)
+        if(posts.length < 1 && !isLoading)
             return (
                 <>
                     <div id="no-posts-overlay">
@@ -106,9 +109,16 @@ class Portal extends React.Component {
             <>
                 <h2 id="bg-title">Popular Posts</h2>
                 <div id="bg-inner-wrapper">
-                    <div id="posts-wrapper">
-                        {posts.map((d, i) => this.renderPost(d, i))}
-                    </div>
+                    {isLoading &&
+                        <div id="post-loading">
+                            <FontAwesomeIcon icon={faCircleNotch} spin />
+                        </div>
+                    }
+                    {!isLoading &&
+                        <div id="posts-wrapper">
+                            {posts.map((d, i) => this.renderPost(d, i))}
+                        </div>
+                    }
                 </div>
             </>
         );

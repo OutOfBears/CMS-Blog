@@ -89,15 +89,26 @@ namespace CMS.Services
             return null;
         }
 
-        public async Task<List<PostLimited>> GetPosts(int start, int limit)
+        public async Task<List<PostLimited>> GetPosts(int start, int limit, string user)
         {
             var sort = Builders<PostLimited>.Sort
                 .Descending("created_at");
 
-            var result = await LimitedPosts.FindAsync(Builders<PostLimited>.Filter.Empty,
+            var filter = Builders<PostLimited>.Filter.Empty;
+            if (!string.IsNullOrWhiteSpace(user))
+                filter = Builders<PostLimited>.Filter.Eq("author._id", user);
+
+            var result = await LimitedPosts.FindAsync(filter,
                 new FindOptions<PostLimited>() {Sort = sort, Limit = limit, Skip = start });
 
             return await result.ToListAsync();
+        }
+
+        public async Task<long> GetTotalPosts()
+        {
+            return await Posts.CountDocumentsAsync(
+                FilterDefinition<Post>.Empty
+            );
         }
 
         public async Task<bool> DeletePost(string _id, string authorId)

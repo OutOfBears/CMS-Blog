@@ -35,7 +35,8 @@ namespace CMS.Controllers
         [HttpGet]
         public async Task<ActionResult> Index(
             [FromQuery] int start = 0,
-            [FromQuery] int limit = 20
+            [FromQuery] int limit = 20,
+            [FromQuery] string user = ""
         )
         {
             if (start < 0)
@@ -45,10 +46,10 @@ namespace CMS.Controllers
             if (limit > 100)
                 return BadRequest("Limit cannot be over 100");
 
-            return Json(
-                await _postsService.GetPosts(start, limit)
-            );
-
+            return Json(new {
+                totalAmount = await _postsService.GetTotalPosts(),
+                data = await _postsService.GetPosts(start, limit, user)
+            });
         }
 
 

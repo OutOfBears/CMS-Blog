@@ -18,6 +18,7 @@ namespace CMS
 {
     public class Startup
     {
+        private static bool isDev;
         public IConfiguration Configuration { get; }
 
         public Startup(IHostingEnvironment env)
@@ -32,10 +33,9 @@ namespace CMS
             if (!Directory.Exists("Thumbnails"))
                 Directory.CreateDirectory("Thumbnails");
 
-            if (env.IsDevelopment())
-            {
+            isDev = env.IsDevelopment();
+            if (isDev)
                 builder.AddUserSecrets<Startup>();
-            }
 
             Configuration = builder.Build();
         }
@@ -69,10 +69,11 @@ namespace CMS
                 options.AddPolicy("default",
                     builder =>
                     {
-                        builder.AllowAnyOrigin()
-                            .AllowAnyHeader()
-                            .AllowCredentials()
-                            .AllowAnyMethod();
+                        if (isDev) 
+                            builder.AllowAnyOrigin()
+                                .AllowAnyHeader()
+                                .AllowCredentials()
+                                .AllowAnyMethod();
                     });
             });
 

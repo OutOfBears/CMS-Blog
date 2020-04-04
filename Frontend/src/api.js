@@ -9,21 +9,30 @@ export const Config = {
 
 const NullFunction = () => { }
 
-export async function GetPost(id, callback = NullFunction)
-{
-    fetch(`${Config.baseUrl}/api/posts/${id}`)
+const SimpleFetch = (url, callback) => {
+    fetch(url)
         .then(res => res.json())
         .then(res => callback(true, res))
-        .catch(ex => callback(false, ex))
+        .catch(ex => callback(false, ex));
 }
 
+/* Users API */
+export async function GetUsers(idx = 0, limit = 10, callback = NullFunction)
+{ SimpleFetch(`${Config.baseUrl}/api/users?start=${idx}&limit=${limit}`, callback); }
+
+export async function GetUser(id, callback = NullFunction)
+{ SimpleFetch(`${Config.baseUrl}/api/users/${id}`, callback); }
+
+
+/* Posts API */
+export async function GetPosts(idx = 0, limit = 10, user = "", callback = NullFunction)
+{ SimpleFetch(`${Config.baseUrl}/api/posts?start=${idx}&limit=${limit}&user=${user}`, callback); }
+
+export async function GetPost(id, callback = NullFunction)
+{ SimpleFetch(`${Config.baseUrl}/api/posts/${id}`, callback); }
+
 export async function GetPopularPosts(limit = 10, callback = NullFunction)
-{
-    fetch(`${Config.baseUrl}/api/posts/popular?limit=${limit}`)
-        .then(res => res.json())
-        .then(res => callback(true, res))
-        .catch(ex => callback(false, ex))
-}
+{ SimpleFetch(`${Config.baseUrl}/api/posts/popular?limit=${limit}`, callback);}
 
 export async function DeletePost(id, callback = NullFunction) {
     fetch(`${Config.baseUrl}/api/posts/${id}`, {
@@ -55,6 +64,8 @@ export async function SubmitPost(title, content, thumbnail, callback = NullFunct
         .then(data => callback(true, data))
         .catch(ex => callback(false, ex));
 }
+
+/* Auth API */
 
 export async function DownloadUser(callback = NullFunction)
 {
